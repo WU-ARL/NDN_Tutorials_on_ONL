@@ -1,0 +1,55 @@
+Tutorial examples of running NDN on ONL
+
+1. Load an ONL topology file, such as 'twoNodes'
+2. Make a reservation
+3. Commit
+
+4. Log in to onl:
+   > ssh <username>@onl.wustl.edu
+
+5. Set up your ~/.ndn directory:
+   > mkdir -p ~/.ndn
+   > cat > ~/.ndn/client.conf << EOF
+transport=unix:///tmp/nfd.sock
+protocol=nrd-0.1
+EOF
+
+6. In a separate terminal window, log in to each of your two nodes:
+   Client:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h1x2
+   
+   Server:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h2x2
+
+7. On each of your nodes, start nfd:
+   Client:
+   h1x2> nfd >& nfd.client.log &
+
+   Server:
+   h2x2> nfd >& nfd.server.log &
+
+
+
+8. One each of your nodes, configure a connection to the other:
+   Client:
+   h1x2> nfdc register /ndn/server udp4://h2x2:6363
+
+   Server:
+   h2x2> nfdc register /ndn/client udp4://h1x2:6363
+
+9. Start ndnpingserver on the Server
+   Server:
+   h2x2> ndnpingserver ndn:/ndn/server 
+
+10. Run ndnping on the Client
+    Client:
+    h1x2> ndnping /ndn/server
+
+
+   
+
+
