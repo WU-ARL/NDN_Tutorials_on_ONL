@@ -1,0 +1,65 @@
+Tutorial examples of running NDN on ONL
+
+1. Load an ONL topology file, such as 'twoNodes'
+2. Make a reservation
+3. Commit
+
+4. Log in to onl:
+   > ssh <username>@onl.wustl.edu
+
+5. Set up your ~/.ndn directory: (for VMs this needs to be done on EACH VM)
+   > mkdir -p ~/.ndn
+   > cat > ~/.ndn/client.conf << EOF
+transport=unix:///tmp/nfd.sock
+protocol=nrd-0.1
+EOF
+
+6. In a separate terminal window, log in to each of your two nodes:
+   Client:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h1x2
+
+   For a VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1
+   
+   Server:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h2x2
+
+   For a VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.2.1
+   
+7. On each of your nodes, start nfd:
+   On VMs: /usr/local/etc/ndn/nfd.conf needs to be set up for now. Soon it will come in
+           the VM img. Take nfd.conf.sample in that directory, copy it to nfd.conf.
+           Edit it to mv /var/run/nfd.sock to /tmp/nfd.sock. And change the two
+           instances of 'mcast yes' to 'mcast no'
+   Client:
+   h1x2> nfd >& nfd.client.log &
+
+   Server:
+   h2x2> nfd >& nfd.server.log &
+
+
+
+8. One each of your nodes, configure a connection to the other:
+   Client:
+   h1x2> nfdc register /ndn/server udp4://h2x2:6363
+
+   Server:
+   h2x2> nfdc register /ndn/client udp4://h1x2:6363
+
+9. Start ndnpingserver on the Server
+   Server:
+   h2x2> ndnpingserver ndn:/ndn/server 
+
+10. Run ndnping on the Client
+    Client:
+    h1x2> ndnping /ndn/server
+
+
+   
+
+
