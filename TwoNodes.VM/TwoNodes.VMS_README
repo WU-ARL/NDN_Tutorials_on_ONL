@@ -46,10 +46,10 @@ EOF
 
 8. One each of your nodes, configure a connection to the other:
    Client:
-   h1x2> nfdc register /ndn/server udp4://h2x2:6363
+   h1x2> nfdc register /ndn/server udp4://192.168.2.2:6363
 
    Server:
-   h2x2> nfdc register /ndn/client udp4://h1x2:6363
+   h2x2> nfdc register /ndn/client udp4://192.168.1.2:6363
 
 9. Start ndnpingserver on the Server
    Server:
