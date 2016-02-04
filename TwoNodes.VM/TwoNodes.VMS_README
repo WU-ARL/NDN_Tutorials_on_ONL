@@ -32,10 +32,7 @@ EOF
    sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.2.1
    
 7. On each of your nodes, start nfd:
-   On VMs: /usr/local/etc/ndn/nfd.conf needs to be set up for now. Soon it will come in
-           the VM img. Take nfd.conf.sample in that directory, copy it to nfd.conf.
-           Edit it to mv /var/run/nfd.sock to /tmp/nfd.sock. And change the two
-           instances of 'mcast yes' to 'mcast no'
+
    Client:
    h1x2> nfd >& nfd.client.log &
 
