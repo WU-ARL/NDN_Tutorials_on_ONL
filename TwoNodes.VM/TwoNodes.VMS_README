@@ -7,14 +7,7 @@ Tutorial examples of running NDN on ONL
 4. Log in to onl:
    > ssh <username>@onl.wustl.edu
 
-5. Set up your ~/.ndn directory: (for VMs this needs to be done on EACH VM)
-   > mkdir -p ~/.ndn
-   > cat > ~/.ndn/client.conf << EOF
-transport=unix:///tmp/nfd.sock
-protocol=nrd-0.1
-EOF
-
-6. In a separate terminal window, log in to each of your two nodes:
+5. In a separate terminal window, log in to each of your two nodes:
    Client:
    > ssh <username>@onl.wustl.edu
    onl> source ~/.topology
@@ -31,7 +24,7 @@ EOF
    For a VM, add a route:
    sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.2.1
    
-7. On each of your nodes, start nfd:
+6. On each of your nodes, start nfd:
 
    Client:
    h1x2> nfd >& nfd.client.log &
@@ -41,20 +34,20 @@ EOF
 
 
 
-8. One each of your nodes, configure a connection to the other:
+7. One each of your nodes, configure a connection to the other:
    Client:
    h1x2> nfdc register /ndn/server udp4://192.168.2.2:6363
 
    Server:
    h2x2> nfdc register /ndn/client udp4://192.168.1.2:6363
 
-9. Start ndnpingserver on the Server
+8. Start ndnpingserver on the Server
    Server:
    h2x2> ndnpingserver ndn:/ndn/server 
 
-10. Run ndnping on the Client
-    Client:
-    h1x2> ndnping /ndn/server
+9. Run ndnping on the Client
+   Client:
+   h1x2> ndnping /ndn/server
 
 
    
