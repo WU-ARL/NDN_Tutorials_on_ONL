@@ -1,0 +1,106 @@
+Tutorial examples of running NDN on ONL
+
+1. Load you ONL topology file: 5Nodes_64bitVMs_SWR
+   This topology presents 1 server and 4 clients
+
+2. Make a reservation
+
+3. Commit
+
+4. Log in to onl:
+   > ssh <username>@onl.wustl.edu
+
+5. In a separate terminal window, log in to each of your five nodes:
+   Server:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h1x2
+   For this VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1
+
+   Client1:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h2x2
+
+   For this VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.2.1
+   
+   Client2:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h3x2
+
+   For this VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.3.1
+   
+   Client3:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h4x2
+
+   For this VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.4.1
+   
+   Client5:
+   > ssh <username>@onl.wustl.edu
+   onl> source ~/.topology
+   onl> ssh $h5x2
+
+   For this VM, add a route:
+   sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.5.1
+   
+6. On each of your nodes, start nfd:
+
+   Server:
+   h1x2> nfd >& nfd.log &
+
+   Client1:
+   h2x2> nfd >& nfd.log &
+
+   Client2:
+   h3x2> nfd >& nfd.log &
+
+   Client3:
+   h4x2> nfd >& nfd.log &
+
+   Client4:
+   h5x2> nfd >& nfd.log &
+
+
+
+7. One each of your clients, configure a connection to the server:
+   Client1:
+   h2x2> nfdc register /ndn/server udp4://192.168.1.2:6363
+
+   Client2:
+   h3x2> nfdc register /ndn/server udp4://192.168.1.2:6363
+
+   Client3:
+   h4x2> nfdc register /ndn/server udp4://192.168.1.2:6363
+
+   Client4:
+   h4x2> nfdc register /ndn/server udp4://192.168.1.2:6363
+
+
+8. Start ndnpingserver on the Server
+   Server:
+   h1x2> ndnpingserver ndn:/ndn/server 
+
+9. Run ndnping on the each of the Clients
+   Client1:
+   h2x2> ndnping /ndn/server
+
+   Client2:
+   h3x2> ndnping /ndn/server
+
+   Client3:
+   h4x2> ndnping /ndn/server
+
+   Client4:
+   h5x2> ndnping /ndn/server
+
+
+   
+
+
