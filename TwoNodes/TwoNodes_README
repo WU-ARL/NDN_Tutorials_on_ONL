@@ -7,7 +7,7 @@ Tutorial examples of running NDN on ONL
 4. Log in to onl:
    > ssh <username>@onl.wustl.edu
 
-5. Set up your ~/.ndn directory:
+5. Set up your ~/.ndn directory (This you should only have to do once on onlusr):
    > mkdir -p ~/.ndn
    > cat > ~/.ndn/client.conf << EOF
 transport=unix:///tmp/nfd.sock
