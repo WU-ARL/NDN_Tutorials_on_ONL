@@ -1,0 +1,141 @@
+
+This tutorial will show you how to build your own topology,
+run and configure nfd, run ndnpingserver on a server node
+and then successfully ndnping from a client node.
+
+1. Start the RLI.
+
+2. Add a SWR (SoftWare Router) to use as an IP router.
+   Topology Menu
+     Select Add PC8core1g
+       Select Add SWR5_1
+         How many instances? 
+           leave as 1 and click OK.
+   Move SWR to the middle. This will be our IP router.
+
+3. Add two VMs.
+   Topology Menu
+     Select Add VM
+       Select Add VM64bit
+         How many instances? 
+           change to 2 and click OK.
+   Two VM64bit instances will appear in the upper left corner of the RLI panel.
+     (They will actually be one on top of the other so you may only see one)
+   Move one of the VM64bit instances close to (1 inch away) from port 2 of SWR.
+   Move the other VM64bit instance close to (1 inch away) from port 4 of SWR.
+
+4. Connect your topology.
+   At the top of your RLI, in the menu bar you should see a button
+   that says "Links Off". This tells you that the ability to draw 
+   links is currently turned Off.
+   Click the "Links Off" button to turn link drawing on.
+   The button should now say "Links On".
+   Take your mouse and click on port 4 of the SWR and without releasing the
+   mouse drag it to the VM64bit you placed near port 4. This should draw
+   a dashed line. When you release your mouse over the VM64bit, its name
+   should change, probably to h1x2.
+   Now do a similar thing with port 2 and the VM64bit you placed
+   near port 2. This should change the name of this VM64bit, probably
+   to h2x2.
+   Turn off the link drawing ability by clicking the "Links On" button.
+
+5. Define default routes.
+   Topology menu
+     Select Generate Default Routes.
+       "Previously generated routes will be removed first."
+         Click OK.
+
+6. Save your topology
+   File menu
+     Select Save As ...
+       Give it a name in the "Save As:" entry
+         perhaps something like MyTwoVMTopo
+         Click Save
+
+   Now you have a saved version of this topology that you can reload later.
+
+7. Make a reservation for (hopefully) right now.
+   File menu
+     Make Reservation
+       In the Duration of experiment, hours: enter 1
+       Click Enter.
+       You should get a popup window asking for your User Name and Password.
+       Enter your ONL User Name and Password and click Enter.
+   Wait for popup confirming the reservation.
+   Check the Date and Time in the confirmation. If it is for now
+   then we are ready to go on to the next step. Click OK.
+
+8. Commit the experiment
+   File menu
+     select Commit.
+   Wait until the indicator at the bottom of the RLI shows "Commit Completed".
+   Now you have a commit experiment and you can log in to your hosts.
+
+From here on we assume that the two hosts are named h1x2 and h2x2.
+If they are not, then substitute the names you have.
+
+9. Get your VM user password.
+    Topology menu
+      Select Show VM Password
+   You will use this password when logging in to your two VMs.
+   They both use the same password.
+
+10. Log in to host h1x2 and configure an IP route.
+   Open a terminal window and ssh in to onl.wustl.edu
+   Once you are logged in to onl
+     onl> source ~/.topology
+     onl> ssh $h1x2
+
+     h1x2> sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1
+
+11. Log in to host h2x2 and configure an IP route.
+   Open a terminal window and ssh in to onl.wustl.edu
+   Once you are logged in to onl
+     > source ~/.topology
+     > ssh $h2x2
+
+     h2x2> sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.2.1
+
+12. Test IP connectivity
+    From your terminal window which is logged in to h1x2:
+    h1x2> ping -c 5 h2x2
+    PING h2x2 (192.168.2.2) 56(84) bytes of data.
+    64 bytes from h2x2 (192.168.2.2): icmp_req=1 ttl=63 time=164 ms
+    64 bytes from h2x2 (192.168.2.2): icmp_req=2 ttl=63 time=0.152 ms
+    64 bytes from h2x2 (192.168.2.2): icmp_req=3 ttl=63 time=0.151 ms
+    64 bytes from h2x2 (192.168.2.2): icmp_req=4 ttl=63 time=0.150 ms
+    64 bytes from h2x2 (192.168.2.2): icmp_req=5 ttl=63 time=0.151 ms
+
+    --- h2x2 ping statistics ---
+    5 packets transmitted, 5 received, 0% packet loss, time 3997ms
+    rtt min/avg/max/mdev = 0.150/33.064/164.720/65.828 ms
+
+13. Configure h2x2 as your server
+    In the terminal window logged in to h2x2:
+    Start nfd:
+         h2x2> nfd >& nfd.server.log &
+    Configure an NDN route to your client:
+         h2x2> nfdc register /ndn/client udp4://192.168.1.2:6363
+    Start ndnpingserver
+         h2x2> ndnpingserver ndn:/ndn/server
+
+14. Configure h1x2 as your client
+    In the terminal window logged in to h1x2:
+    Start nfd:
+         h1x2> nfd >& nfd.client.log &
+    Configure an NDN route to your server:
+         h1x2> nfdc register /ndn/server udp4://192.168.2.2:6363
+    Run ndnping
+         h1x2> ndnping -c 5 ndn:/ndn/server
+         PING /ndn/server
+         content from /ndn/server: seq=14581705676331575985 time=5.49469 ms
+         content from /ndn/server: seq=14581705676331575986 time=0.87564 ms
+         content from /ndn/server: seq=14581705676331575987 time=0.8377 ms
+         content from /ndn/server: seq=14581705676331575988 time=0.921599 ms
+         content from /ndn/server: seq=14581705676331575989 time=0.796867 ms
+
+         --- /ndn/server ping statistics ---
+         5 packets transmitted, 5 received, 0% packet loss, time 8.9265 ms
+         rtt min/avg/max/mdev = 0.796867/1.7853/5.49469/1.85515 ms
+
+
