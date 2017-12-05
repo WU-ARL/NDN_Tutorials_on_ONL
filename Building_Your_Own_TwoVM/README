@@ -75,7 +75,7 @@ and then successfully ndnping from a client node.
    File menu
      select Commit.
    Wait until the indicator at the bottom of the RLI shows "Commit Completed".
-   Now you have a commit experiment and you can log in to your hosts.
+   Now you have a committed experiment and you can log in to your hosts.
 
 From here on we assume that the two hosts are named h1x2 and h2x2.
 If they are not, then substitute the names you have.

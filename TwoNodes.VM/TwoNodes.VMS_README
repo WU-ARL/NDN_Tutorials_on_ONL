@@ -1,11 +1,42 @@
 Tutorial examples of running NDN on ONL
 
-1. Load an ONL topology file, such as 'twoNodes'
-2. Make a reservation
-3. Commit
+0. Assumptions:
+   - you have an ONL account (go to: https://onl.wustl.edu and select "Get an account" in left panel)
+   - you have the RLI (go to:  https://onl.wustl.edu ,  log in and select "Get RLI" in left panel)
+   - you know how to run the RLI (go to:  https://onl.wustl.edu , log in and select "Getting Started" in left panel)
+   - you know how to start the required ssh tunnel (go to:  https://onl.wustl.edu , log in and select "Getting Started" in left panel)
 
-4. Log in to onl:
-   > ssh <username>@onl.wustl.edu
+1. Load an ONL topology file, such as 'twoNodes_64bitVMs_SWR'
+     Copy the file, twoNodes_64bitVMs_SWR, into ~/.onldir on your office/home machine (NOT on onlusr)
+     Start the ONL tunnel
+     Start the RLI (on your home/office machine, NOT onlsur)
+     In File Menu
+         Select Open
+            Select the file twoNodes_64bitVMs_SWR
+              Click Open
+     
+2. Make a reservation
+   File menu
+     Make Reservation
+       In the Duration of experiment, hours: enter 1
+       Click Enter.
+       You should get a popup window asking for your User Name and Password.
+       Enter your ONL User Name and Password and click Enter.
+   Wait for popup confirming the reservation.
+   Check the Date and Time in the confirmation. If it is for now
+   then we are ready to go on to the next step. Click OK.
+
+3. Commit
+   File menu
+     select Commit.
+   Wait until the indicator at the bottom of the RLI shows "Commit Completed".
+   Now you have a committed experiment and you can log in to your hosts.
+
+4. Get your VM user password.
+    Topology menu
+      Select Show VM Password
+   You will use this password when logging in to your two VMs.
+   They both use the same password.
 
 5. In a separate terminal window, log in to each of your two nodes:
    Client:
@@ -13,7 +44,7 @@ Tutorial examples of running NDN on ONL
    onl> source ~/.topology
    onl> ssh $h1x2
 
-   For a VM, add a route:
+   Add an IP route:
    sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1
    
    Server:
@@ -21,10 +52,28 @@ Tutorial examples of running NDN on ONL
    onl> source ~/.topology
    onl> ssh $h2x2
 
-   For a VM, add a route:
+   Add an IP route:
    sudo route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.2.1
    
-6. On each of your nodes, start nfd:
+6. Test IP connectivity
+    (Note that the hosts files on the VMs are not currently populated with the hostnames,
+     so we use the IP addresses. Hostnames like h1x2 have IP address of 192.168.1.2.
+     So a hostname of hAxB has an IP address of 192.168.A.B)
+
+    From your terminal window which is logged in to h1x2:
+    h1x2> ping -c 5 192.168.2.2
+PING 192.168.2.2 (192.168.2.2) 56(84) bytes of data.
+64 bytes from 192.168.2.2: icmp_seq=1 ttl=63 time=1.61 ms
+64 bytes from 192.168.2.2: icmp_seq=2 ttl=63 time=0.883 ms
+64 bytes from 192.168.2.2: icmp_seq=3 ttl=63 time=0.814 ms
+64 bytes from 192.168.2.2: icmp_seq=4 ttl=63 time=0.910 ms
+64 bytes from 192.168.2.2: icmp_seq=5 ttl=63 time=0.810 ms
+
+--- 192.168.2.2 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4001ms
+rtt min/avg/max/mdev = 0.810/1.005/1.611/0.307 ms
+
+7. On each of your nodes, start nfd:
 
    Client:
    h1x2> nfd >& nfd.client.log &
@@ -34,20 +83,37 @@ Tutorial examples of running NDN on ONL
 
 
 
-7. One each of your nodes, configure a connection to the other:
+8. One each of your nodes, configure an NDN route to the other:
    Client:
-   h1x2> nfdc register /ndn/server udp4://192.168.2.2:6363
+         h1x2> nfdc face create udp4://192.168.2.2:6363
+         face-created id=258 local=udp4://192.168.1.2:6363 remote=udp4://192.168.2.2:6363 persistency=persistent
 
+         h1x2> nfdc route add /ndn/server udp4://192.168.2.2:6363
+         route-add-accepted prefix=/ndn/server nexthop=258 origin=static cost=0 flags=child-inherit expires=never
    Server:
-   h2x2> nfdc register /ndn/client udp4://192.168.1.2:6363
+         h2x2> nfdc face create udp4://192.168.1.2:6363
+         face-created id=258 local=udp4://192.168.2.2:6363 remote=udp4://192.168.1.2:6363 persistency=persistent
 
-8. Start ndnpingserver on the Server
+         h2x2> nfdc route add /ndn/client udp4://192.168.1.2:6363
+         route-add-accepted prefix=/ndn/client nexthop=258 origin=static cost=0 flags=child-inherit expires=never
+
+9. Start ndnpingserver on the Server
    Server:
    h2x2> ndnpingserver ndn:/ndn/server 
 
-9. Run ndnping on the Client
+10. Run ndnping on the Client
    Client:
-   h1x2> ndnping /ndn/server
+   h1x2> ndnping -c 5 /ndn/server
+   PING /ndn/server
+   content from /ndn/server: seq=16514291832291652513 time=7.46748 ms
+   content from /ndn/server: seq=16514291832291652514 time=1.65408 ms
+   content from /ndn/server: seq=16514291832291652515 time=1.48671 ms
+   content from /ndn/server: seq=16514291832291652516 time=1.45316 ms
+   content from /ndn/server: seq=16514291832291652517 time=1.37619 ms
+
+   --- /ndn/server ping statistics ---
+   5 packets transmitted, 5 received, 0 nacked, 0% lost, 0% nacked, time 13.4376 ms
+   rtt min/avg/max/mdev = 1.37619/2.68752/7.46748/2.3917 ms
 
 
    
