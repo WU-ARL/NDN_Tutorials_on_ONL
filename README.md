@@ -1,6 +1,9 @@
 # NDN_Tutorials_on_ONL
 A collection of tutorial examples for using NDN on ONL (onl.wustl.edu)
 
+If a Tutorial is present in this repository but it is not listed here 
+it is probably not ready for use yet or it is in need of updates.
+
 TwoNodes:
   A simple two node topology that sets up an ndn ping server and client using ONL hosts.
   The TwoNodes/TwoNodes_README file gives step by step directions on 
